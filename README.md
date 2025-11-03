@@ -1,36 +1,88 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Regex Example (Next.js + PNPM + GitHub Pages)
 
-## Getting Started
+A simple Next.js project demonstrating regular expression examples, built with **PNPM** and deployed to **GitHub Pages** as a fully static site.
 
-First, run the development server:
+---
+
+## 🚀 Features
+
+- Next.js static export (`next export`)
+- Fast dependency management with **pnpm**
+- Automatic GitHub Pages deployment using **GitHub Actions**
+- Easy local preview (`pnpm run preview`)
+
+---
+
+## 🛠️ Setup
+
+### 1. Install dependencies
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pnpm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 2. Run locally
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```pnpm
+pnpm dev
+```
 
-## Learn More
+The app will be available at [http://localhost:3000]()
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 🏗️ Build & Test Static Export
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+To build and serve the static version locally:
 
-## Deploy on Vercel
+```pnpm
+pnpm run preview
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Then open [http://localhost:8080]()
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+
+## ⚙️ Deployment
+
+This project automatically deploys to **GitHub Pages** using a workflow defined in
+
+`.github/workflows/deploy.yml`.
+
+On every push to the `main` branch:
+
+1. The site is built with `pnpm run build`
+2. The static output (`out/`) is deployed to the `gh-pages` branch
+
+---
+
+## 📂 Folder Structure
+
+```
+regex-example/
+├── .github/workflows/deploy.yml  # GitHub Actions deployment
+├── out/                          # Static export (generated)</span><span>
+├── pages/                        # Next.js pages
+├── public/                       # Static assets
+├── next.config.js                # Next.js config (output: "export")
+├── package.json
+└── pnpm
+```
+
+---
+
+## 🧩 Useful Commands
+
+| Command          | Description                       |
+| ---------------- | --------------------------------- |
+| `pnpm dev`     | Run Next.js in development mode   |
+| `pnpm build`   | Build and export static site      |
+| `pnpm preview` | Build & serve static site locally |
+| `pnpm install` | Install dependencies              |
+
+---
+
+## About
+
+Created by **ZeqTech** as a practical example for regex demonstrations and static Next.js deployment workflows.
