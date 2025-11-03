@@ -1,19 +1,38 @@
-name: Deploy Next.js static site to GitHub Pages
+name: Deploy Next.js static site to GitHub Pages (pnpm)
+
 on:
   push:
-    branches: [main]
+    branches: [ main ]
+
+permissions:
+  contents: write  # needed for GitHub Pages deploy
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: 20
-      - run: pnpm i
-      - run: pnpm run build
-      - name: Deploy
+          cache: 'pnpm'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 9  # or your preferred version
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build Next.js site
+        run: pnpm run build
+
+      - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
