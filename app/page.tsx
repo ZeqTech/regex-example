@@ -1,81 +1,29 @@
 'use client';
 
-import { useState, useMemo, JSX } from "react";
+import { useState, useMemo, JSX, lazy } from "react";
 import { cn } from "@/lib/utils";
 
-import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "../components/ui/button";
+// Lazy load Card components to reduce initial bundle
+const Card = lazy( () => import( "@/components/ui/card" ).then( mod => ( { default: mod.Card } ) ) );
+const CardHeader = lazy( () => import( "@/components/ui/card" ).then( mod => ( { default: mod.CardHeader } ) ) );
+const CardContent = lazy( () => import( "@/components/ui/card" ).then( mod => ( { default: mod.CardContent } ) ) );
+const CardTitle = lazy( () => import( "@/components/ui/card" ).then( mod => ( { default: mod.CardTitle } ) ) );
 
-const exampleSets: Record<string, string> = {
-  names: `Zeq Tech
-Iron Man
-John Doe`,
+const EXAMPLE_SETS = ['names', 'emails', 'urls', 'phone', 'dates', 'ipv4', 'words', 'digits'] as const;
+type ExampleType = typeof EXAMPLE_SETS[number];
 
-  emails: `zeq@tech.com
-iron.man@example.org
-carlos@domain.net
-milo+vip@sparks.dev
-hello.world-42@sub.domain.co.uk`,
-
-  urls: `https://example.com
-http://blog.example.org
-https://www.sparks.dev/docs
-https://sub.domain.co.uk/path?query=123
-http://localhost:3000`,
-
-  phone: `+1 210-555-7890
-(512) 555-1234
-+44 20 7946 0958
-555-432-9988
-+81 3-1234-5678`,
-
-  dates: `2024-01-01
-1999-12-31
-2025-07-04
-2023-02-28
-2030-11-15`,
-
-  ipv4: `192.168.0.1
-10.0.0.254
-8.8.8.8
-172.16.32.15
-127.0.0.1`,
-
-  words: `alpha
-bravo
-charlie
-delta123
-under_score`,
-
-  digits: `42
-007
-123456789
-9001
-2025`,
-
-  code: `const userName = "Zeq";
-let count = 42;
-
-function greet() { return "hi"; }
-
-if (x > 10) {
-  console.log(x);
-}`,
-
-  mixed: `Email: zeq@tech.com
-Backup: admin@sparks.dev
-Site: https://www.sparks.dev/docs
-Call: +1 210-555-7890
-Date: 2024-10-31
-IP: 192.168.1.100
-Value: 9001`
-};
-
-
+function capitalizeFirstLetter( str: string )
+{
+  if ( typeof str !== 'string' || str.length === 0 ) {
+    return str; // Handle empty strings or non-string inputs
+  }
+  return str.charAt( 0 ).toUpperCase() + str.slice( 1 );
+}
 
 export default function RegexPreview()
 {
@@ -91,6 +39,14 @@ export default function RegexPreview()
   const [flagS, setFlagS] = useState( false );
 
   const flags = `g${ flagI ? "i" : "" }${ flagM ? "m" : "" }${ flagS ? "s" : "" }`;
+
+  // Lazy-load example sets dynamically
+  const loadExampleSet = async ( type: ExampleType ) =>
+  {
+    if ( !type ) return
+    const module = await import( `../data/example-${ type }` );
+    setText( module.default );
+  };
 
   let regexError: string | null = null;
   const regex = useMemo( () =>
@@ -133,7 +89,7 @@ export default function RegexPreview()
       parts.push(
         <span
           key={`m-${ offset }`}
-          className="bg-yellow-400 text-black font-semibold px-0.5 rounded-sm"
+          className="bg-yellow-400 text-black font-semibold px-1  rounded-lg"
         >
           {match}
         </span>
@@ -194,7 +150,7 @@ export default function RegexPreview()
       parts.push(
         <span
           key={`rh-${ m.index }`}
-          className="bg-amber-400 text-black font-semibold px-1 rounded-sm mx-1"
+          className="bg-amber-400 text-black font-semibold px-1 rounded-lg"
         >
           {replacement}
         </span>
@@ -219,6 +175,10 @@ export default function RegexPreview()
     return groups ? groups.length : 0;
   }, [regex] );
 
+  const highlighted = useMemo( () => highlightMatches( text ), [text, regex] );
+  const replaced = useMemo( () => enableReplace ? highlightReplaced( text ) : text, [text, regex, replaceValue] );
+
+
   return (
     <div className="w-screen h-screen flex justify-center items-center align-center">
       <div className="w-full h-screen bg-neutral-900 text-neutral-100 flex flex-col items-center py-10 px-4">
@@ -233,12 +193,12 @@ export default function RegexPreview()
             {/* pattern */}
             <div className="space-y-1">
               {/* Presets */}
-              <div className="space-x-5 flex flex-row items-center">
+              <div className="space-x-5 grid grid-cols-2 items-center">
                 <div className=" space-y-2">
                   <Label className="text-neutral-300">Presets</Label>
 
                   <select
-                    className=" bg-neutral-800 border border-neutral-700 text-neutral-200 rounded-md p-2 text-sm"
+                    className=" bg-neutral-800 border border-neutral-700 text-neutral-200 rounded-md p-2 text-sm w-full"
                     onChange={( e ) =>
                     {
                       const v = e.target.value;
@@ -271,26 +231,10 @@ export default function RegexPreview()
                 {/* Example input sets */}
                 <div className="space-y-2">
                   <Label className="text-neutral-300">Data</Label>
-                  <select
-                    className=" bg-neutral-800 border border-neutral-700 text-neutral-200 rounded-md p-2 text-sm"
-                    onChange={( e ) =>
-                    {
-                      const v = e.target.value;
-                      if ( !v ) return;
-                      setText( exampleSets?.[v] )
-                    }
-                    }
-                    defaultValue=""
-                  >
+                  <select className="bg-neutral-800 border border-neutral-700 text-neutral-200 rounded-md p-2 text-sm w-full"
+                    onChange={e => loadExampleSet( e.target.value as ExampleType )} defaultValue="">
                     <option value="">Select Data…</option>
-                    <option value="names">Names</option>
-                    <option value="emails">Email</option>
-                    <option value="urls">URL</option>
-                    <option value="phone">Phone</option>
-                    <option value="dates">Date (YYYY-MM-DD)</option>
-                    <option value="ipv4">IPv4</option>
-                    <option value="words">Words</option>
-                    <option value="digits">Digits</option>
+                    {EXAMPLE_SETS.map( s => <option key={s} value={s}>{capitalizeFirstLetter( s )}</option> )}
                   </select>
                 </div>
               </div>
@@ -481,7 +425,7 @@ export default function RegexPreview()
                 className="absolute top-0 left-0 w-full h-64 p-3 rounded-md font-mono whitespace-pre-wrap overflow-auto pointer-events-none bg-neutral-800 border border-neutral-700 text-neutral-200"
                 style={{ zIndex: 1 }}
               >
-                {highlightMatches( text )}
+                {highlighted}
               </pre>
 
               <textarea
@@ -509,7 +453,7 @@ export default function RegexPreview()
                   id="highlight-layer"
                   style={{ zIndex: 1 }}
                 >
-                  {regex ? highlightReplaced( text ) : text}</pre>
+                  {replaced}</pre>
               </Card>
             </div>
           )}
