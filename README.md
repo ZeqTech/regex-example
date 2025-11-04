@@ -2,6 +2,12 @@
 
 A simple Next.js project demonstrating regular expression examples, built with **PNPM** and deployed to **GitHub Pages** as a fully static site.
 
+
+## Check it out at
+
+https://regex.zeqtech.io/
+
+
 ---
 
 ## 🚀 Features
@@ -20,7 +26,6 @@ A simple Next.js project demonstrating regular expression examples, built with *
 ```bash
 pnpm install
 ```
-
 
 ### 2. Run locally
 
